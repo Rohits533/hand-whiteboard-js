@@ -10,7 +10,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f0f2f6;
@@ -20,7 +19,6 @@
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
             background: white;
             border-radius: 20px;
@@ -29,7 +27,6 @@
             max-width: 1400px;
             width: 100%;
         }
-
         .header {
             text-align: center;
             padding: 20px;
@@ -38,23 +35,19 @@
             color: white;
             margin-bottom: 30px;
         }
-
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
-
         .header p {
             opacity: 0.9;
             font-size: 1.1rem;
         }
-
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 280px;
             gap: 20px;
         }
-
         .drawing-area {
             background: white;
             border: 3px solid #e0e0e0;
@@ -62,7 +55,6 @@
             padding: 15px;
             position: relative;
         }
-
         #canvas {
             width: 100%;
             height: auto;
@@ -72,7 +64,6 @@
             background: white;
             touch-action: none;
         }
-
         .camera-feed {
             background: white;
             border: 3px solid #e0e0e0;
@@ -80,36 +71,30 @@
             padding: 15px;
             margin-top: 15px;
         }
-
         #video {
             width: 100%;
             border-radius: 10px;
             transform: scaleX(-1);
             display: none;
         }
-
         #landmarkCanvas {
             width: 100%;
             border-radius: 10px;
             display: none;
         }
-
         .controls {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 20px;
             height: fit-content;
         }
-
         .controls h3 {
             margin-bottom: 15px;
             color: #333;
         }
-
         .control-group {
             margin-bottom: 20px;
         }
-
         .control-group label {
             display: block;
             font-size: 0.9rem;
@@ -117,13 +102,11 @@
             color: #555;
             margin-bottom: 5px;
         }
-
         .color-picker-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         #colorPicker {
             width: 50px;
             height: 50px;
@@ -132,11 +115,9 @@
             cursor: pointer;
             padding: 0;
         }
-
         #brushSize {
             width: 100%;
         }
-
         .btn {
             width: 100%;
             padding: 12px;
@@ -148,53 +129,43 @@
             transition: all 0.3s;
             margin-bottom: 8px;
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
         .btn-primary:hover {
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-
         .btn-danger {
             background: #ef4444;
             color: white;
         }
-
         .btn-danger:hover {
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-
         .btn-success {
             background: #22c55e;
             color: white;
         }
-
         .btn-success:hover {
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-
         .btn-warning {
             background: #f59e0b;
             color: white;
         }
-
         .btn-warning:hover {
             transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
-
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
         }
-
         .status {
             padding: 10px;
             border-radius: 10px;
@@ -203,44 +174,31 @@
             margin: 10px 0;
             transition: all 0.3s;
         }
-
         .status-idle {
             background: #fef3c7;
             color: #92400e;
         }
-
         .status-drawing {
             background: #d1fae5;
             color: #065f46;
         }
-
         .status-paused {
             background: #fee2e2;
             color: #991b1b;
         }
-
         .status-tracking {
             background: #dbeafe;
             color: #1e40af;
         }
-
         .status-error {
             background: #fee2e2;
             color: #991b1b;
         }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
         .shape-selector {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 5px;
         }
-
         .shape-btn {
             padding: 8px;
             border: 2px solid #ddd;
@@ -250,16 +208,13 @@
             font-size: 0.8rem;
             transition: all 0.3s;
         }
-
         .shape-btn.active {
             border-color: #667eea;
             background: #eef2ff;
         }
-
         .shape-btn:hover {
             border-color: #667eea;
         }
-
         .loading {
             display: inline-block;
             width: 20px;
@@ -269,13 +224,11 @@
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
         }
-
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
-
         .smoothness-badge {
             display: inline-block;
             background: #22c55e;
@@ -285,12 +238,10 @@
             font-size: 0.7rem;
             margin-left: 5px;
         }
-
         @media (max-width: 768px) {
             .main-layout {
                 grid-template-columns: 1fr;
             }
-
             .header h1 {
                 font-size: 1.8rem;
             }
@@ -320,7 +271,7 @@
                         <button id="clearBtn" class="btn btn-warning">🗑️ Clear</button>
                     </div>
                     <div style="margin-top: 8px; display: flex; gap: 10px; align-items: center; justify-content: center;">
-                        <span style="font-size:0.8rem; color:#666;">🔄 Smooth Tracking <span class="smoothness-badge">Optimized</span></span>
+                        <span style="font-size:0.8rem; color:#666;">🔄 Kalman Filter <span class="smoothness-badge">Pro</span></span>
                     </div>
                 </div>
             </div>
@@ -363,7 +314,6 @@
         </div>
     </div>
 
-    <!-- MediaPipe CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous">
     </script>
@@ -372,34 +322,92 @@
 
     <script>
         // ============================================
-        // SMOOTHING FILTER CLASS
+        // KALMAN FILTER FOR SMOOTH TRACKING
         // ============================================
-        class SmoothingFilter {
-            constructor(alpha = 0.25) {
-                this.alpha = alpha;
-                this.prev = null;
+        class KalmanFilter {
+            constructor(processNoise = 0.1, measurementNoise = 0.5, initialValue = 0) {
+                this.processNoise = processNoise;
+                this.measurementNoise = measurementNoise;
+                this.estimate = initialValue;
+                this.errorCovariance = 1;
+                this.kalmanGain = 0;
             }
 
-            smooth(landmarks) {
-                if (!this.prev || landmarks.length !== this.prev.length) {
-                    this.prev = landmarks.map(lm => ({ ...lm }));
-                    return landmarks;
+            update(measurement) {
+                // Prediction
+                const predictedEstimate = this.estimate;
+                const predictedErrorCovariance = this.errorCovariance + this.processNoise;
+
+                // Update
+                this.kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + this.measurementNoise);
+                this.estimate = predictedEstimate + this.kalmanGain * (measurement - predictedEstimate);
+                this.errorCovariance = (1 - this.kalmanGain) * predictedErrorCovariance;
+
+                return this.estimate;
+            }
+
+            reset(value) {
+                this.estimate = value;
+                this.errorCovariance = 1;
+                this.kalmanGain = 0;
+            }
+        }
+
+        // ============================================
+        // 2D KALMAN FILTER FOR POSITION TRACKING
+        // ============================================
+        class PositionFilter {
+            constructor() {
+                this.x = new KalmanFilter(0.1, 0.3, 0);
+                this.y = new KalmanFilter(0.1, 0.3, 0);
+                this.velocityX = new KalmanFilter(0.01, 0.05, 0);
+                this.velocityY = new KalmanFilter(0.01, 0.05, 0);
+                this.lastX = 0;
+                this.lastY = 0;
+                this.hasLast = false;
+                this.smoothness = 0.7; // Higher = smoother but more lag
+            }
+
+            update(rawX, rawY) {
+                // First update
+                if (!this.hasLast) {
+                    this.x.reset(rawX);
+                    this.y.reset(rawY);
+                    this.lastX = rawX;
+                    this.lastY = rawY;
+                    this.hasLast = true;
+                    return { x: rawX, y: rawY };
                 }
 
-                // Apply exponential moving average
-                return landmarks.map((lm, i) => {
-                    const prev = this.prev[i];
-                    return {
-                        x: this.alpha * lm.x + (1 - this.alpha) * prev.x,
-                        y: this.alpha * lm.y + (1 - this.alpha) * prev.y,
-                        z: this.alpha * lm.z + (1 - this.alpha) * prev.z,
-                        visibility: lm.visibility
-                    };
-                });
+                // Calculate velocity
+                const dt = 0.033; // ~30fps
+                const vx = (rawX - this.lastX) / dt;
+                const vy = (rawY - this.lastY) / dt;
+
+                // Smooth velocity
+                const smoothVx = this.velocityX.update(vx);
+                const smoothVy = this.velocityY.update(vy);
+
+                // Predict next position using velocity
+                const predictedX = this.x.estimate + smoothVx * dt * this.smoothness;
+                const predictedY = this.y.estimate + smoothVy * dt * this.smoothness;
+
+                // Update with measurement
+                const filteredX = this.x.update(rawX * 0.3 + predictedX * 0.7);
+                const filteredY = this.y.update(rawY * 0.3 + predictedY * 0.7);
+
+                this.lastX = rawX;
+                this.lastY = rawY;
+
+                return { x: filteredX, y: filteredY };
             }
 
             reset() {
-                this.prev = null;
+                this.hasLast = false;
+                this.x.reset(0);
+                this.y.reset(0);
+                this.velocityX.reset(0);
+                this.velocityY.reset(0);
             }
         }
 
@@ -418,13 +426,7 @@
             lastPoint: null,
             canvasWidth: 1200,
             canvasHeight: 700,
-            fingerX: 0,
-            fingerY: 0,
             isFist: false,
-            detectionConfidence: 0.7,
-            trackingConfidence: 0.5,
-            framesSinceLost: 0,
-            isHandTracked: false,
             lostCounter: 0,
             lastValidPoint: null
         };
@@ -454,7 +456,7 @@
 
         let cameraInstance = null;
         let handsInstance = null;
-        let smoothingFilter = new SmoothingFilter(0.25);
+        let positionFilter = new PositionFilter();
 
         // ============================================
         // CANVAS FUNCTIONS
@@ -512,7 +514,6 @@
             const data = canvas.toDataURL();
             state.history.push(data);
             state.redoStack = [];
-            // Limit history to prevent memory issues
             if (state.history.length > 100) {
                 state.history.shift();
             }
@@ -547,11 +548,12 @@
             ctx.fillRect(0, 0, state.canvasWidth, state.canvasHeight);
             state.points = [];
             state.lastPoint = null;
+            positionFilter.reset();
             saveState();
         }
 
         // ============================================
-        // HAND TRACKING WITH SMOOTHING
+        // HAND TRACKING WITH KALMAN FILTER
         // ============================================
         function onResults(results) {
             if (!state.isTracking) return;
@@ -565,46 +567,41 @@
             canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                // Reset lost counter - hand is detected
                 state.lostCounter = 0;
-                state.isHandTracked = true;
+                const landmarks = results.multiHandLandmarks[0];
 
-                const rawLandmarks = results.multiHandLandmarks[0];
-
-                // Apply smoothing filter
-                const smoothedLandmarks = smoothingFilter.smooth(rawLandmarks);
-
-                // Draw smoothed landmarks
+                // Draw landmarks
                 const drawingUtils = window;
-                drawingUtils.drawConnectors(canvasCtx, smoothedLandmarks,
+                drawingUtils.drawConnectors(canvasCtx, landmarks,
                     drawingUtils.HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
-                drawingUtils.drawLandmarks(canvasCtx, smoothedLandmarks, { color: '#FF0000', lineWidth: 1 });
+                drawingUtils.drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 1 });
 
-                // Get index finger tip (landmark 8) from smoothed landmarks
-                const indexTip = smoothedLandmarks[8];
-                const x = indexTip.x * canvasElement.width;
-                const y = indexTip.y * canvasElement.height;
+                // Get index finger tip
+                const indexTip = landmarks[8];
+                const rawX = indexTip.x * canvasElement.width;
+                const rawY = indexTip.y * canvasElement.height;
+
+                // Apply Kalman filter for smooth tracking
+                const filtered = positionFilter.update(rawX, rawY);
 
                 // Map to canvas coordinates
-                const canvasX = (x / canvasElement.width) * state.canvasWidth;
-                const canvasY = (y / canvasElement.height) * state.canvasHeight;
+                const canvasX = (filtered.x / canvasElement.width) * state.canvasWidth;
+                const canvasY = (filtered.y / canvasElement.height) * state.canvasHeight;
 
-                state.fingerX = canvasX;
-                state.fingerY = canvasY;
                 state.lastValidPoint = { x: canvasX, y: canvasY };
 
-                // Check if fist with improved detection
+                // Check if fist - using Kalman smoothed positions for better detection
                 const tips = [8, 12, 16, 20];
                 const joints = [6, 10, 14, 18];
                 let folded = 0;
                 for (let i = 0; i < tips.length; i++) {
-                    if (smoothedLandmarks[tips[i]].y > smoothedLandmarks[joints[i]].y) {
+                    if (landmarks[tips[i]].y > landmarks[joints[i]].y) {
                         folded++;
                     }
                 }
                 state.isFist = folded >= 3;
 
-                // Update status based on gesture
+                // Update status
                 if (state.isFist) {
                     status.className = 'status status-paused';
                     status.innerHTML = '✊ Fist detected - Drawing paused';
@@ -618,18 +615,18 @@
                     if (state.lastPoint) {
                         if (state.shape === 'free') {
                             drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
-                            // Save state periodically (every 10 strokes to prevent memory bloat)
-                            if (state.history.length === 0 || state.history.length % 10 === 0) {
-                                saveState();
-                            }
                         } else {
                             state.points.push(currentPoint);
-                            // Redraw shape
                             const imgData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
                             drawShape(state.points);
                         }
+                        // Save state periodically
+                        if (state.history.length % 10 === 0) {
+                            saveState();
+                        }
                     } else {
                         state.points = [currentPoint];
+                        saveState();
                     }
 
                     state.lastPoint = currentPoint;
@@ -637,35 +634,34 @@
 
                 // Draw finger tip circle on camera feed
                 canvasCtx.beginPath();
-                canvasCtx.arc(x, y, 10, 0, 2 * Math.PI);
+                canvasCtx.arc(rawX, rawY, 10, 0, 2 * Math.PI);
                 canvasCtx.fillStyle = state.isFist ? '#FF0000' : '#00FF00';
                 canvasCtx.fill();
 
-                // Add smoothness indicator on camera feed
+                // Show filter info
                 canvasCtx.fillStyle = 'rgba(0,0,0,0.5)';
-                canvasCtx.fillRect(10, 10, 120, 25);
+                canvasCtx.fillRect(10, 10, 140, 25);
                 canvasCtx.fillStyle = 'white';
                 canvasCtx.font = '14px Arial';
-                canvasCtx.fillText('✨ Smooth Tracking', 20, 28);
+                canvasCtx.fillText('⚡ Kalman Filter', 20, 28);
 
                 canvasElement.style.display = 'block';
                 video.style.display = 'none';
 
             } else {
-                // Hand lost - use cached position if available
                 state.lostCounter++;
                 if (state.lostCounter < 5 && state.lastValidPoint) {
-                    // Briefly use last valid position to prevent flickering
+                    // Use last valid position with slight decay
                     state.lastPoint = state.lastValidPoint;
                     status.className = 'status status-tracking';
                     status.innerHTML = '🔄 Recovering tracking...';
                     canvasElement.style.display = 'block';
                     video.style.display = 'none';
                 } else {
-                    state.isHandTracked = false;
                     status.className = 'status status-idle';
                     status.innerHTML = '👋 No hand detected - Show your hand';
                     state.lastPoint = null;
+                    positionFilter.reset();
                     canvasElement.style.display = 'none';
                     video.style.display = 'block';
                 }
@@ -673,7 +669,7 @@
         }
 
         // ============================================
-        // CAMERA SETUP WITH OPTIMIZED CONFIG
+        // CAMERA SETUP
         // ============================================
         async function startTracking() {
             try {
@@ -683,15 +679,12 @@
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
 
-                // Reset smoothing filter on new session
-                smoothingFilter.reset();
+                positionFilter.reset();
 
-                // Check if MediaPipe is loaded
                 if (typeof Hands === 'undefined') {
-                    throw new Error('MediaPipe library not loaded. Please refresh the page.');
+                    throw new Error('MediaPipe library not loaded.');
                 }
 
-                // Create hands instance with optimized settings
                 handsInstance = new Hands({
                     locateFile: (file) => {
                         return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`;
@@ -700,20 +693,19 @@
 
                 handsInstance.setOptions({
                     maxNumHands: 1,
-                    modelComplexity: 1, // 1 = full model for accuracy
+                    modelComplexity: 1,
                     minDetectionConfidence: 0.7,
                     minTrackingConfidence: 0.5
                 });
 
                 handsInstance.onResults(onResults);
 
-                // Create camera instance with optimized resolution
                 cameraInstance = new Camera(video, {
                     onFrame: async () => {
                         try {
                             await handsInstance.send({ image: video });
                         } catch (err) {
-                            // Silent fail - prevents console spam
+                            // Silent fail
                         }
                     },
                     width: 640,
@@ -729,7 +721,7 @@
             } catch (err) {
                 console.error('Camera error:', err);
                 status.className = 'status status-error';
-                status.innerHTML = '❌ Error: ' + err.message + '. Please refresh and try again.';
+                status.innerHTML = '❌ Error: ' + err.message;
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
                 state.isTracking = false;
@@ -740,25 +732,14 @@
             state.isTracking = false;
             state.lastPoint = null;
             state.points = [];
-            state.isHandTracked = false;
-            state.lostCounter = 0;
-            smoothingFilter.reset();
+            positionFilter.reset();
 
             if (cameraInstance) {
-                try {
-                    cameraInstance.stop();
-                } catch (err) {
-                    console.warn('Camera stop error:', err);
-                }
+                try { cameraInstance.stop(); } catch (err) {}
                 cameraInstance = null;
             }
-
             if (handsInstance) {
-                try {
-                    handsInstance.close();
-                } catch (err) {
-                    console.warn('Hands close error:', err);
-                }
+                try { handsInstance.close(); } catch (err) {}
                 handsInstance = null;
             }
 
@@ -780,7 +761,7 @@
             clearCanvas();
             state.points = [];
             state.lastPoint = null;
-            smoothingFilter.reset();
+            positionFilter.reset();
         });
 
         undoBtn.addEventListener('click', undo);
@@ -813,7 +794,9 @@
             });
         });
 
-        // Mouse drawing (fallback when camera is off)
+        // ============================================
+        // MOUSE DRAWING (Fallback)
+        // ============================================
         let isMouseDown = false;
         let savedImageData = null;
 
@@ -867,51 +850,6 @@
             }
         });
 
-        // Touch support for tablets
-        canvas.addEventListener('touchstart', (e) => {
-            if (state.isTracking) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const x = (touch.clientX - rect.left) * scaleX;
-            const y = (touch.clientY - rect.top) * scaleY;
-            state.points = [{ x, y }];
-            savedImageData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
-            isMouseDown = true;
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            if (!isMouseDown || state.isTracking) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const x = (touch.clientX - rect.left) * scaleX;
-            const y = (touch.clientY - rect.top) * scaleY;
-
-            state.points.push({ x, y });
-
-            if (state.shape === 'free') {
-                drawLine(state.points[state.points.length - 2].x, state.points[state.points.length - 2].y, x, y);
-            } else {
-                ctx.putImageData(savedImageData, 0, 0);
-                drawShape(state.points);
-            }
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', () => {
-            if (isMouseDown && !state.isTracking) {
-                isMouseDown = false;
-                if (state.points.length > 1) {
-                    saveState();
-                }
-                state.points = [];
-            }
-        });
-
         // ============================================
         // INIT
         // ============================================
@@ -919,21 +857,14 @@
         stopBtn.disabled = true;
         landmarkCanvas.style.display = 'none';
 
-        console.log('🖐️ Hand Tracking Whiteboard Ready!');
-        console.log('📝 Draw with your finger using the camera or mouse/touch!');
-        console.log('✨ Smooth tracking enabled with predictive filtering');
+        console.log('🖐️ Hand Tracking Whiteboard with Kalman Filter Ready!');
 
-        // Handle page unload cleanly
         window.addEventListener('beforeunload', () => {
             if (cameraInstance) {
-                try {
-                    cameraInstance.stop();
-                } catch (err) {}
+                try { cameraInstance.stop(); } catch (err) {}
             }
             if (handsInstance) {
-                try {
-                    handsInstance.close();
-                } catch (err) {}
+                try { handsInstance.close(); } catch (err) {}
             }
         });
     </script>
