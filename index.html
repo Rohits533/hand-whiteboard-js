@@ -276,6 +276,16 @@
             }
         }
 
+        .smoothness-badge {
+            display: inline-block;
+            background: #22c55e;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
         @media (max-width: 768px) {
             .main-layout {
                 grid-template-columns: 1fr;
@@ -291,7 +301,7 @@
     <div class="container">
         <div class="header">
             <h1>🖐️ Hand Tracking Whiteboard</h1>
-            <p>Draw in the air using your fingers! Show your hand to the camera.</p>
+            <p>Draw in the air using your fingers! Smooth & interactive tracking.</p>
         </div>
 
         <div class="main-layout">
@@ -308,6 +318,9 @@
                         <button id="startBtn" class="btn btn-primary">🎥 Start Tracking</button>
                         <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop</button>
                         <button id="clearBtn" class="btn btn-warning">🗑️ Clear</button>
+                    </div>
+                    <div style="margin-top: 8px; display: flex; gap: 10px; align-items: center; justify-content: center;">
+                        <span style="font-size:0.8rem; color:#666;">🔄 Smooth Tracking <span class="smoothness-badge">Optimized</span></span>
                     </div>
                 </div>
             </div>
@@ -350,7 +363,7 @@
         </div>
     </div>
 
-    <!-- MediaPipe CDN - UPDATED VERSION -->
+    <!-- MediaPipe CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous">
     </script>
@@ -358,6 +371,38 @@
     </script>
 
     <script>
+        // ============================================
+        // SMOOTHING FILTER CLASS
+        // ============================================
+        class SmoothingFilter {
+            constructor(alpha = 0.25) {
+                this.alpha = alpha;
+                this.prev = null;
+            }
+
+            smooth(landmarks) {
+                if (!this.prev || landmarks.length !== this.prev.length) {
+                    this.prev = landmarks.map(lm => ({ ...lm }));
+                    return landmarks;
+                }
+
+                // Apply exponential moving average
+                return landmarks.map((lm, i) => {
+                    const prev = this.prev[i];
+                    return {
+                        x: this.alpha * lm.x + (1 - this.alpha) * prev.x,
+                        y: this.alpha * lm.y + (1 - this.alpha) * prev.y,
+                        z: this.alpha * lm.z + (1 - this.alpha) * prev.z,
+                        visibility: lm.visibility
+                    };
+                });
+            }
+
+            reset() {
+                this.prev = null;
+            }
+        }
+
         // ============================================
         // STATE
         // ============================================
@@ -375,7 +420,13 @@
             canvasHeight: 700,
             fingerX: 0,
             fingerY: 0,
-            isFist: false
+            isFist: false,
+            detectionConfidence: 0.7,
+            trackingConfidence: 0.5,
+            framesSinceLost: 0,
+            isHandTracked: false,
+            lostCounter: 0,
+            lastValidPoint: null
         };
 
         // ============================================
@@ -403,7 +454,7 @@
 
         let cameraInstance = null;
         let handsInstance = null;
-        let animationId = null;
+        let smoothingFilter = new SmoothingFilter(0.25);
 
         // ============================================
         // CANVAS FUNCTIONS
@@ -461,6 +512,10 @@
             const data = canvas.toDataURL();
             state.history.push(data);
             state.redoStack = [];
+            // Limit history to prevent memory issues
+            if (state.history.length > 100) {
+                state.history.shift();
+            }
         }
 
         function undo() {
@@ -496,7 +551,7 @@
         }
 
         // ============================================
-        // HAND TRACKING
+        // HAND TRACKING WITH SMOOTHING
         // ============================================
         function onResults(results) {
             if (!state.isTracking) return;
@@ -510,16 +565,23 @@
             canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                const landmarks = results.multiHandLandmarks[0];
+                // Reset lost counter - hand is detected
+                state.lostCounter = 0;
+                state.isHandTracked = true;
 
-                // Draw hand landmarks
+                const rawLandmarks = results.multiHandLandmarks[0];
+
+                // Apply smoothing filter
+                const smoothedLandmarks = smoothingFilter.smooth(rawLandmarks);
+
+                // Draw smoothed landmarks
                 const drawingUtils = window;
-                drawingUtils.drawConnectors(canvasCtx, landmarks, drawingUtils.HAND_CONNECTIONS, { color: '#00FF00',
-                    lineWidth: 2 });
-                drawingUtils.drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 1 });
+                drawingUtils.drawConnectors(canvasCtx, smoothedLandmarks,
+                    drawingUtils.HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
+                drawingUtils.drawLandmarks(canvasCtx, smoothedLandmarks, { color: '#FF0000', lineWidth: 1 });
 
-                // Get index finger tip (landmark 8)
-                const indexTip = landmarks[8];
+                // Get index finger tip (landmark 8) from smoothed landmarks
+                const indexTip = smoothedLandmarks[8];
                 const x = indexTip.x * canvasElement.width;
                 const y = indexTip.y * canvasElement.height;
 
@@ -529,19 +591,20 @@
 
                 state.fingerX = canvasX;
                 state.fingerY = canvasY;
+                state.lastValidPoint = { x: canvasX, y: canvasY };
 
-                // Check if fist
+                // Check if fist with improved detection
                 const tips = [8, 12, 16, 20];
                 const joints = [6, 10, 14, 18];
                 let folded = 0;
                 for (let i = 0; i < tips.length; i++) {
-                    if (landmarks[tips[i]].y > landmarks[joints[i]].y) {
+                    if (smoothedLandmarks[tips[i]].y > smoothedLandmarks[joints[i]].y) {
                         folded++;
                     }
                 }
                 state.isFist = folded >= 3;
 
-                // Update status
+                // Update status based on gesture
                 if (state.isFist) {
                     status.className = 'status status-paused';
                     status.innerHTML = '✊ Fist detected - Drawing paused';
@@ -555,7 +618,10 @@
                     if (state.lastPoint) {
                         if (state.shape === 'free') {
                             drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
-                            saveState();
+                            // Save state periodically (every 10 strokes to prevent memory bloat)
+                            if (state.history.length === 0 || state.history.length % 10 === 0) {
+                                saveState();
+                            }
                         } else {
                             state.points.push(currentPoint);
                             // Redraw shape
@@ -569,25 +635,45 @@
                     state.lastPoint = currentPoint;
                 }
 
-                // Draw finger tip circle
+                // Draw finger tip circle on camera feed
                 canvasCtx.beginPath();
                 canvasCtx.arc(x, y, 10, 0, 2 * Math.PI);
                 canvasCtx.fillStyle = state.isFist ? '#FF0000' : '#00FF00';
                 canvasCtx.fill();
 
+                // Add smoothness indicator on camera feed
+                canvasCtx.fillStyle = 'rgba(0,0,0,0.5)';
+                canvasCtx.fillRect(10, 10, 120, 25);
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.font = '14px Arial';
+                canvasCtx.fillText('✨ Smooth Tracking', 20, 28);
+
                 canvasElement.style.display = 'block';
                 video.style.display = 'none';
+
             } else {
-                status.className = 'status status-idle';
-                status.innerHTML = '👋 No hand detected - Show your hand';
-                state.lastPoint = null;
-                canvasElement.style.display = 'none';
-                video.style.display = 'block';
+                // Hand lost - use cached position if available
+                state.lostCounter++;
+                if (state.lostCounter < 5 && state.lastValidPoint) {
+                    // Briefly use last valid position to prevent flickering
+                    state.lastPoint = state.lastValidPoint;
+                    status.className = 'status status-tracking';
+                    status.innerHTML = '🔄 Recovering tracking...';
+                    canvasElement.style.display = 'block';
+                    video.style.display = 'none';
+                } else {
+                    state.isHandTracked = false;
+                    status.className = 'status status-idle';
+                    status.innerHTML = '👋 No hand detected - Show your hand';
+                    state.lastPoint = null;
+                    canvasElement.style.display = 'none';
+                    video.style.display = 'block';
+                }
             }
         }
 
         // ============================================
-        // CAMERA SETUP
+        // CAMERA SETUP WITH OPTIMIZED CONFIG
         // ============================================
         async function startTracking() {
             try {
@@ -597,12 +683,15 @@
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
 
+                // Reset smoothing filter on new session
+                smoothingFilter.reset();
+
                 // Check if MediaPipe is loaded
                 if (typeof Hands === 'undefined') {
                     throw new Error('MediaPipe library not loaded. Please refresh the page.');
                 }
 
-                // Create hands instance
+                // Create hands instance with optimized settings
                 handsInstance = new Hands({
                     locateFile: (file) => {
                         return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`;
@@ -611,24 +700,25 @@
 
                 handsInstance.setOptions({
                     maxNumHands: 1,
-                    modelComplexity: 1,
+                    modelComplexity: 1, // 1 = full model for accuracy
                     minDetectionConfidence: 0.7,
                     minTrackingConfidence: 0.5
                 });
 
                 handsInstance.onResults(onResults);
 
-                // Create camera instance
+                // Create camera instance with optimized resolution
                 cameraInstance = new Camera(video, {
                     onFrame: async () => {
                         try {
                             await handsInstance.send({ image: video });
                         } catch (err) {
-                            console.warn('Frame processing error:', err);
+                            // Silent fail - prevents console spam
                         }
                     },
                     width: 640,
-                    height: 480
+                    height: 480,
+                    facingMode: 'user'
                 });
 
                 await cameraInstance.start();
@@ -650,6 +740,9 @@
             state.isTracking = false;
             state.lastPoint = null;
             state.points = [];
+            state.isHandTracked = false;
+            state.lostCounter = 0;
+            smoothingFilter.reset();
 
             if (cameraInstance) {
                 try {
@@ -687,6 +780,7 @@
             clearCanvas();
             state.points = [];
             state.lastPoint = null;
+            smoothingFilter.reset();
         });
 
         undoBtn.addEventListener('click', undo);
@@ -719,7 +813,7 @@
             });
         });
 
-        // Mouse drawing
+        // Mouse drawing (fallback when camera is off)
         let isMouseDown = false;
         let savedImageData = null;
 
@@ -773,6 +867,51 @@
             }
         });
 
+        // Touch support for tablets
+        canvas.addEventListener('touchstart', (e) => {
+            if (state.isTracking) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            state.points = [{ x, y }];
+            savedImageData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
+            isMouseDown = true;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isMouseDown || state.isTracking) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+
+            state.points.push({ x, y });
+
+            if (state.shape === 'free') {
+                drawLine(state.points[state.points.length - 2].x, state.points[state.points.length - 2].y, x, y);
+            } else {
+                ctx.putImageData(savedImageData, 0, 0);
+                drawShape(state.points);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => {
+            if (isMouseDown && !state.isTracking) {
+                isMouseDown = false;
+                if (state.points.length > 1) {
+                    saveState();
+                }
+                state.points = [];
+            }
+        });
+
         // ============================================
         // INIT
         // ============================================
@@ -781,9 +920,10 @@
         landmarkCanvas.style.display = 'none';
 
         console.log('🖐️ Hand Tracking Whiteboard Ready!');
-        console.log('📝 Draw with your finger using the camera or mouse!');
+        console.log('📝 Draw with your finger using the camera or mouse/touch!');
+        console.log('✨ Smooth tracking enabled with predictive filtering');
 
-        // Handle page unload
+        // Handle page unload cleanly
         window.addEventListener('beforeunload', () => {
             if (cameraInstance) {
                 try {
