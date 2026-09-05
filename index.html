@@ -3,169 +3,140 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🖐️ Hand Tracking Whiteboard</title>
+    <title>🖐️ Hand Tracking Whiteboard + Subway Surfers</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f6;
+            background: #0a0a0a;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
+
         .container {
-            background: white;
+            background: #1a1a2e;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            padding: 30px;
+            padding: 20px;
             max-width: 1400px;
             width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
+
         .header {
-            text-align: center;
-            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 15px;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
+
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
         }
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
         }
+
+        .header-controls button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-whiteboard {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-game {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-whiteboard.active {
+            background: #66bb6a;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-game.active {
+            background: #ef5350;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+        }
+
+        .header-controls button:hover {
+            transform: scale(1.05);
+        }
+
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 280px;
             gap: 20px;
         }
+
+        /* ===== WHITEBOARD ===== */
+        .whiteboard-section {
+            display: block;
+        }
+
+        .whiteboard-section.hidden {
+            display: none;
+        }
+
         .drawing-area {
-            background: white;
-            border: 3px solid #e0e0e0;
+            background: #16213e;
+            border: 3px solid #2a3a6e;
             border-radius: 15px;
             padding: 15px;
-            position: relative;
         }
+
         #canvas {
             width: 100%;
             height: auto;
-            cursor: crosshair;
             border-radius: 10px;
             display: block;
             background: white;
             touch-action: none;
+            cursor: crosshair;
         }
+
         .camera-feed {
-            background: white;
-            border: 3px solid #e0e0e0;
+            background: #16213e;
+            border: 3px solid #2a3a6e;
             border-radius: 15px;
             padding: 15px;
             margin-top: 15px;
         }
+
         #video {
             width: 100%;
             border-radius: 10px;
             transform: scaleX(-1);
             display: none;
         }
+
         #landmarkCanvas {
             width: 100%;
             border-radius: 10px;
             display: none;
         }
-        .controls {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            height: fit-content;
-        }
-        .controls h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        .control-group {
-            margin-bottom: 20px;
-        }
-        .control-group label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 5px;
-        }
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #colorPicker {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            cursor: pointer;
-            padding: 0;
-        }
-        #brushSize {
-            width: 100%;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 8px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        .btn-danger:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-        .btn-success {
-            background: #22c55e;
-            color: white;
-        }
-        .btn-success:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
-        }
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-        .btn-warning:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+
         .status {
             padding: 10px;
             border-radius: 10px;
@@ -174,61 +145,170 @@
             margin: 10px 0;
             transition: all 0.3s;
         }
+
         .status-idle {
             background: #fef3c7;
             color: #92400e;
         }
+
         .status-drawing {
             background: #d1fae5;
             color: #065f46;
         }
+
         .status-paused {
             background: #fee2e2;
             color: #991b1b;
         }
+
         .status-tracking {
             background: #dbeafe;
             color: #1e40af;
         }
+
         .status-error {
             background: #fee2e2;
             color: #991b1b;
         }
+
+        .controls {
+            background: #16213e;
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+            border: 3px solid #2a3a6e;
+        }
+
+        .controls h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #colorPicker {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #2a3a6e;
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+
+        #brushSize {
+            width: 100%;
+            accent-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
         .shape-selector {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 5px;
         }
+
         .shape-btn {
-            padding: 8px;
-            border: 2px solid #ddd;
+            padding: 6px;
+            border: 2px solid #2a3a6e;
             border-radius: 8px;
-            background: white;
+            background: #0a0a1a;
+            color: #aaa;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             transition: all 0.3s;
         }
+
         .shape-btn.active {
             border-color: #667eea;
-            background: #eef2ff;
+            background: #1a2a5e;
+            color: white;
         }
+
         .shape-btn:hover {
             border-color: #667eea;
+            color: white;
         }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+
         .smoothness-badge {
             display: inline-block;
             background: #22c55e;
@@ -238,12 +318,190 @@
             font-size: 0.7rem;
             margin-left: 5px;
         }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== GAME ===== */
+        .game-section {
+            display: none;
+        }
+
+        .game-section.active {
+            display: block;
+        }
+
+        .game-container {
+            background: #0a0a1a;
+            border: 3px solid #2a3a6e;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #1a1a3e;
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .game-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .game-overlay h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .game-overlay p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .game-overlay .btn {
+            width: auto;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .game-overlay .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #0a0a1a;
+            border-bottom: 2px solid #2a3a6e;
+            color: white;
+        }
+
+        .game-stats span {
+            font-size: 1.1rem;
+        }
+
+        .game-stats .score {
+            color: #fbbf24;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .game-stats .high-score {
+            color: #34d399;
+            font-size: 1rem;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 8px;
+            padding: 10px 15px;
+            background: #0a0a1a;
+            border-top: 2px solid #2a3a6e;
+            flex-wrap: wrap;
+        }
+
+        .game-controls .btn {
+            flex: 1;
+            min-width: 60px;
+            font-size: 0.8rem;
+            padding: 8px;
+            margin: 0;
+        }
+
+        .game-gesture-hint {
+            display: flex;
+            gap: 15px;
+            padding: 10px 15px;
+            background: #0a0a1a;
+            border-top: 1px solid #2a3a6e;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-gesture-hint .hint {
+            color: #888;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .game-gesture-hint .hint .emoji {
+            font-size: 1.2rem;
+        }
+
+        .game-gesture-hint .hint .key {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .main-layout {
                 grid-template-columns: 1fr;
             }
+
             .header h1 {
-                font-size: 1.8rem;
+                font-size: 1.2rem;
+            }
+
+            .header-controls button {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+
+            .game-overlay h1 {
+                font-size: 2.5rem;
+            }
+
+            .game-stats span {
+                font-size: 0.9rem;
+            }
+
+            .game-gesture-hint .hint {
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -251,12 +509,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🖐️ Hand Tracking Whiteboard</h1>
-            <p>Draw in the air using your fingers! Smooth & interactive tracking.</p>
+            <h1>🖐️ Hand Tracking Studio</h1>
+            <div class="header-controls">
+                <button id="modeWhiteboard" class="btn-whiteboard active">✏️ Whiteboard</button>
+                <button id="modeGame" class="btn-game">🎮 Subway Surfers</button>
+            </div>
         </div>
 
         <div class="main-layout">
-            <div>
+            <!-- WHITEBOARD -->
+            <div id="whiteboardSection" class="whiteboard-section">
                 <div class="drawing-area">
                     <canvas id="canvas" width="1200" height="700"></canvas>
                 </div>
@@ -270,12 +532,42 @@
                         <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop</button>
                         <button id="clearBtn" class="btn btn-warning">🗑️ Clear</button>
                     </div>
-                    <div style="margin-top: 8px; display: flex; gap: 10px; align-items: center; justify-content: center;">
-                        <span style="font-size:0.8rem; color:#666;">🔄 Kalman Filter <span class="smoothness-badge">Pro</span></span>
+                </div>
+            </div>
+
+            <!-- GAME -->
+            <div id="gameSection" class="game-section">
+                <div class="game-container">
+                    <div class="game-stats">
+                        <span>🏃 <span class="score" id="scoreDisplay">0</span></span>
+                        <span>🏆 <span class="high-score" id="highScoreDisplay">0</span></span>
+                    </div>
+
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+                    <div class="game-overlay" id="gameOverlay">
+                        <h1 id="gameOverlayTitle">🏃 SUBWAY SURFERS</h1>
+                        <p id="gameOverlaySub">Use hand gestures to play!</p>
+                        <button class="btn" id="gameStartBtn">🎮 Start Game</button>
+                    </div>
+
+                    <div class="game-controls">
+                        <button class="btn btn-success" id="gameStartBtn2">▶️ Start</button>
+                        <button class="btn btn-danger" id="gamePauseBtn">⏸️ Pause</button>
+                        <button class="btn btn-warning" id="gameResetBtn">🔄 Reset</button>
+                    </div>
+
+                    <div class="game-gesture-hint">
+                        <span class="hint"><span class="emoji">☝️</span> Jump <span class="key">(Index up)</span></span>
+                        <span class="hint"><span class="emoji">✊</span> Roll <span class="key">(Fist)</span></span>
+                        <span class="hint"><span class="emoji">👈</span> Left <span class="key">(Hand left)</span></span>
+                        <span class="hint"><span class="emoji">👉</span> Right <span class="key">(Hand right)</span></span>
+                        <span class="hint"><span class="emoji">✋</span> Run <span class="key">(Open hand)</span></span>
                     </div>
                 </div>
             </div>
 
+            <!-- CONTROLS SIDEBAR -->
             <div class="controls">
                 <h3>🎨 Tools</h3>
 
@@ -283,17 +575,17 @@
                     <label>Color</label>
                     <div class="color-picker-wrapper">
                         <input type="color" id="colorPicker" value="#FF0000" />
-                        <span id="colorHex">#FF0000</span>
+                        <span id="colorHex" style="color:#aaa;">#FF0000</span>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <label>Brush Size: <span id="sizeLabel">5</span></label>
+                    <label>Brush Size: <span id="sizeLabel" style="color:white;">5</span></label>
                     <input type="range" id="brushSize" min="1" max="30" value="5" />
                 </div>
 
                 <div class="control-group">
-                    <label>Shape</label>
+                    <label style="color:#aaa;">Shape</label>
                     <div class="shape-selector">
                         <button class="shape-btn active" data-shape="free">✏️ Free</button>
                         <button class="shape-btn" data-shape="line">📏 Line</button>
@@ -302,18 +594,25 @@
                     </div>
                 </div>
 
-                <hr style="margin: 15px 0;" />
+                <hr style="border-color: #2a3a6e; margin: 15px 0;" />
 
                 <button id="undoBtn" class="btn btn-success">↩️ Undo</button>
                 <button id="redoBtn" class="btn btn-success">↪️ Redo</button>
 
-                <hr style="margin: 15px 0;" />
+                <hr style="border-color: #2a3a6e; margin: 15px 0;" />
 
                 <button id="downloadBtn" class="btn btn-primary">💾 Download PNG</button>
+
+                <hr style="border-color: #2a3a6e; margin: 15px 0;" />
+
+                <div style="color:#666; font-size:0.8rem; text-align:center;">
+                    <span style="color:#888;">🔄 Kalman Filter <span class="smoothness-badge">Pro</span></span>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous">
     </script>
@@ -322,7 +621,7 @@
 
     <script>
         // ============================================
-        // KALMAN FILTER FOR SMOOTH TRACKING
+        // KALMAN FILTER
         // ============================================
         class KalmanFilter {
             constructor(processNoise = 0.1, measurementNoise = 0.5, initialValue = 0) {
@@ -334,15 +633,11 @@
             }
 
             update(measurement) {
-                // Prediction
                 const predictedEstimate = this.estimate;
                 const predictedErrorCovariance = this.errorCovariance + this.processNoise;
-
-                // Update
                 this.kalmanGain = predictedErrorCovariance / (predictedErrorCovariance + this.measurementNoise);
                 this.estimate = predictedEstimate + this.kalmanGain * (measurement - predictedEstimate);
                 this.errorCovariance = (1 - this.kalmanGain) * predictedErrorCovariance;
-
                 return this.estimate;
             }
 
@@ -353,82 +648,61 @@
             }
         }
 
-        // ============================================
-        // 2D KALMAN FILTER FOR POSITION TRACKING
-        // ============================================
         class PositionFilter {
             constructor() {
                 this.x = new KalmanFilter(0.1, 0.3, 0);
                 this.y = new KalmanFilter(0.1, 0.3, 0);
-                this.velocityX = new KalmanFilter(0.01, 0.05, 0);
-                this.velocityY = new KalmanFilter(0.01, 0.05, 0);
-                this.lastX = 0;
-                this.lastY = 0;
                 this.hasLast = false;
-                this.smoothness = 0.7; // Higher = smoother but more lag
             }
 
             update(rawX, rawY) {
-                // First update
                 if (!this.hasLast) {
                     this.x.reset(rawX);
                     this.y.reset(rawY);
-                    this.lastX = rawX;
-                    this.lastY = rawY;
                     this.hasLast = true;
                     return { x: rawX, y: rawY };
                 }
-
-                // Calculate velocity
-                const dt = 0.033; // ~30fps
-                const vx = (rawX - this.lastX) / dt;
-                const vy = (rawY - this.lastY) / dt;
-
-                // Smooth velocity
-                const smoothVx = this.velocityX.update(vx);
-                const smoothVy = this.velocityY.update(vy);
-
-                // Predict next position using velocity
-                const predictedX = this.x.estimate + smoothVx * dt * this.smoothness;
-                const predictedY = this.y.estimate + smoothVy * dt * this.smoothness;
-
-                // Update with measurement
-                const filteredX = this.x.update(rawX * 0.3 + predictedX * 0.7);
-                const filteredY = this.y.update(rawY * 0.3 + predictedY * 0.7);
-
-                this.lastX = rawX;
-                this.lastY = rawY;
-
-                return { x: filteredX, y: filteredY };
+                return {
+                    x: this.x.update(rawX),
+                    y: this.y.update(rawY)
+                };
             }
 
             reset() {
                 this.hasLast = false;
                 this.x.reset(0);
                 this.y.reset(0);
-                this.velocityX.reset(0);
-                this.velocityY.reset(0);
             }
         }
 
         // ============================================
-        // STATE
+        // GLOBAL STATE
         // ============================================
         const state = {
-            isDrawing: false,
+            // Tracking
             isTracking: false,
             color: '#FF0000',
             brushSize: 5,
             shape: 'free',
+            // Whiteboard
             points: [],
             history: [],
             redoStack: [],
             lastPoint: null,
             canvasWidth: 1200,
             canvasHeight: 700,
+            // Hand
             isFist: false,
-            lostCounter: 0,
-            lastValidPoint: null
+            handX: 0,
+            handY: 0,
+            isHandDetected: false,
+            // Game
+            gameRunning: false,
+            gamePaused: false,
+            gameScore: 0,
+            gameHighScore: 0,
+            // Mode
+            mode: 'whiteboard' // 'whiteboard' | 'game'
         };
 
         // ============================================
@@ -453,13 +727,30 @@
         const downloadBtn = document.getElementById('downloadBtn');
 
         const shapeBtns = document.querySelectorAll('.shape-btn');
+        const modeWhiteboard = document.getElementById('modeWhiteboard');
+        const modeGame = document.getElementById('modeGame');
+        const whiteboardSection = document.getElementById('whiteboardSection');
+        const gameSection = document.getElementById('gameSection');
+
+        // Game
+        const gameCanvas = document.getElementById('gameCanvas');
+        const gCtx = gameCanvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const gameOverlayTitle = document.getElementById('gameOverlayTitle');
+        const gameOverlaySub = document.getElementById('gameOverlaySub');
+        const gameStartBtn = document.getElementById('gameStartBtn');
+        const gameStartBtn2 = document.getElementById('gameStartBtn2');
+        const gamePauseBtn = document.getElementById('gamePauseBtn');
+        const gameResetBtn = document.getElementById('gameResetBtn');
 
         let cameraInstance = null;
         let handsInstance = null;
         let positionFilter = new PositionFilter();
 
         // ============================================
-        // CANVAS FUNCTIONS
+        // WHITEBOARD FUNCTIONS
         // ============================================
         function initCanvas() {
             ctx.fillStyle = '#FFFFFF';
@@ -480,12 +771,10 @@
 
         function drawShape(points) {
             if (points.length < 2) return;
-
             ctx.strokeStyle = state.color;
             ctx.lineWidth = state.brushSize;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-
             ctx.beginPath();
             ctx.moveTo(points[0].x, points[0].y);
 
@@ -514,9 +803,7 @@
             const data = canvas.toDataURL();
             state.history.push(data);
             state.redoStack = [];
-            if (state.history.length > 100) {
-                state.history.shift();
-            }
+            if (state.history.length > 100) state.history.shift();
         }
 
         function undo() {
@@ -553,7 +840,452 @@
         }
 
         // ============================================
-        // HAND TRACKING WITH KALMAN FILTER
+        // GAME - SUBWAY SURFERS CLONE
+        // ============================================
+        const game = {
+            player: { x: 400, y: 480, width: 40, height: 60, lane: 1, jumping: false, rolling: false, jumpY: 0,
+            jumpSpeed: 0 },
+            lanes: [280, 400, 520],
+            obstacles: [],
+            coins: [],
+            speed: 5,
+            score: 0,
+            highScore: 0,
+            gameOver: false,
+            paused: false,
+            frameCount: 0,
+            spawnRate: 30,
+            coinSpawnRate: 20,
+            playerColor: '#f44336',
+            groundY: 540
+        };
+
+        function initGame() {
+            game.obstacles = [];
+            game.coins = [];
+            game.score = 0;
+            game.speed = 5;
+            game.gameOver = false;
+            game.paused = false;
+            game.frameCount = 0;
+            game.player.lane = 1;
+            game.player.jumping = false;
+            game.player.rolling = false;
+            game.player.jumpY = 0;
+            game.player.x = game.lanes[1];
+            game.player.y = 480;
+            gameOverlay.classList.remove('show');
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = Math.floor(game.score);
+            if (game.score > game.highScore) {
+                game.highScore = game.score;
+                highScoreDisplay.textContent = Math.floor(game.highScore);
+            }
+        }
+
+        function spawnObstacle() {
+            const lane = Math.floor(Math.random() * 3);
+            const type = Math.random() > 0.6 ? 'crate' : 'barrier';
+            game.obstacles.push({
+                x: 850,
+                y: game.groundY - (type === 'crate' ? 40 : 50),
+                width: 40,
+                height: type === 'crate' ? 40 : 50,
+                lane: lane,
+                type: type,
+                color: type === 'crate' ? '#8B6914' : '#DC143C'
+            });
+        }
+
+        function spawnCoin() {
+            const lane = Math.floor(Math.random() * 3);
+            game.coins.push({
+                x: 850,
+                y: game.groundY - 70 - Math.random() * 60,
+                width: 20,
+                height: 20,
+                lane: lane,
+                collected: false
+            });
+        }
+
+        function updateGame() {
+            if (game.gameOver || game.paused) return;
+
+            game.frameCount++;
+            game.score += 0.5;
+            updateScoreDisplay();
+
+            // Speed up gradually
+            game.speed = 5 + Math.floor(game.score / 1000);
+
+            // Spawn obstacles
+            if (game.frameCount % Math.max(20, game.spawnRate - Math.floor(game.score / 500)) === 0) {
+                spawnObstacle();
+            }
+
+            // Spawn coins
+            if (game.frameCount % Math.max(15, game.coinSpawnRate - Math.floor(game.score / 300)) === 0) {
+                spawnCoin();
+            }
+
+            // Player jump physics
+            if (game.player.jumping) {
+                game.player.jumpY += game.player.jumpSpeed;
+                game.player.jumpSpeed += 0.6;
+                game.player.y = 480 - game.player.jumpY;
+                if (game.player.jumpY < 0) {
+                    game.player.jumping = false;
+                    game.player.jumpY = 0;
+                    game.player.jumpSpeed = 0;
+                    game.player.y = 480;
+                }
+            }
+
+            // Player position
+            game.player.x = game.lanes[game.player.lane];
+
+            // Move obstacles
+            for (let i = game.obstacles.length - 1; i >= 0; i--) {
+                game.obstacles[i].x -= game.speed;
+                if (game.obstacles[i].x < -50) {
+                    game.obstacles.splice(i, 1);
+                    continue;
+                }
+
+                // Collision with player
+                const obs = game.obstacles[i];
+                const px = game.player.x;
+                const py = game.player.y;
+                const pw = game.player.width;
+                const ph = game.player.height;
+
+                // Check if same lane
+                if (Math.abs(obs.x - px) < 30) {
+                    // Check collision (with rolling)
+                    const playerHeight = game.player.rolling ? ph * 0.5 : ph;
+                    const playerY = game.player.rolling ? py + ph * 0.5 : py;
+
+                    if (obs.y + obs.height > playerY && obs.y < playerY + playerHeight) {
+                        // Check if rolling under barrier
+                        if (game.player.rolling && obs.type === 'barrier') {
+                            // Roll under!
+                        } else {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Move coins
+            for (let i = game.coins.length - 1; i >= 0; i--) {
+                game.coins[i].x -= game.speed;
+                if (game.coins[i].x < -30) {
+                    game.coins.splice(i, 1);
+                    continue;
+                }
+
+                // Collect coin
+                const coin = game.coins[i];
+                if (!coin.collected && Math.abs(coin.x - game.player.x) < 25 && Math.abs(coin.y - game.player.y) < 30) {
+                    coin.collected = true;
+                    game.score += 15;
+                    updateScoreDisplay();
+                    game.coins.splice(i, 1);
+                }
+            }
+
+            // Increase difficulty
+            if (game.frameCount % 100 === 0 && game.spawnRate > 10) {
+                game.spawnRate--;
+            }
+        }
+
+        function gameOver() {
+            game.gameOver = true;
+            gameOverlayTitle.textContent = '💀 GAME OVER';
+            gameOverlaySub.textContent = `Score: ${Math.floor(game.score)}`;
+            gameOverlay.classList.add('show');
+            if (game.score > game.highScore) {
+                game.highScore = game.score;
+                highScoreDisplay.textContent = Math.floor(game.highScore);
+            }
+        }
+
+        function drawGame() {
+            gCtx.clearRect(0, 0, 800, 600);
+
+            // Background - sky gradient
+            const grad = gCtx.createLinearGradient(0, 0, 0, 600);
+            grad.addColorStop(0, '#1a1a4e');
+            grad.addColorStop(0.5, '#2a3a6e');
+            grad.addColorStop(1, '#0a0a2e');
+            gCtx.fillStyle = grad;
+            gCtx.fillRect(0, 0, 800, 600);
+
+            // Ground
+            gCtx.fillStyle = '#2a2a4e';
+            gCtx.fillRect(0, game.groundY, 800, 60);
+            gCtx.fillStyle = '#3a3a6e';
+            gCtx.fillRect(0, game.groundY, 800, 5);
+
+            // Lanes
+            for (let i = 0; i < 3; i++) {
+                const x = game.lanes[i];
+                gCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+                gCtx.lineWidth = 1;
+                gCtx.setLineDash([10, 20]);
+                gCtx.beginPath();
+                gCtx.moveTo(x, game.groundY);
+                gCtx.lineTo(x, 0);
+                gCtx.stroke();
+                gCtx.setLineDash([]);
+            }
+
+            // Draw coins
+            for (const coin of game.coins) {
+                gCtx.fillStyle = '#fbbf24';
+                gCtx.shadowColor = '#fbbf24';
+                gCtx.shadowBlur = 15;
+                gCtx.beginPath();
+                gCtx.arc(coin.x, coin.y, 12, 0, Math.PI * 2);
+                gCtx.fill();
+                gCtx.shadowBlur = 0;
+                // Shine
+                gCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                gCtx.beginPath();
+                gCtx.arc(coin.x - 4, coin.y - 4, 4, 0, Math.PI * 2);
+                gCtx.fill();
+            }
+
+            // Draw obstacles
+            for (const obs of game.obstacles) {
+                gCtx.fillStyle = obs.color;
+                gCtx.shadowColor = obs.color;
+                gCtx.shadowBlur = 10;
+                if (obs.type === 'crate') {
+                    gCtx.fillRect(obs.x - obs.width / 2, obs.y - obs.height, obs.width, obs.height);
+                    gCtx.strokeStyle = '#6B4F14';
+                    gCtx.lineWidth = 2;
+                    gCtx.strokeRect(obs.x - obs.width / 2, obs.y - obs.height, obs.width, obs.height);
+                    // X marks
+                    gCtx.strokeStyle = '#4a3510';
+                    gCtx.lineWidth = 1;
+                    gCtx.beginPath();
+                    gCtx.moveTo(obs.x - obs.width / 2, obs.y - obs.height);
+                    gCtx.lineTo(obs.x + obs.width / 2, obs.y);
+                    gCtx.moveTo(obs.x + obs.width / 2, obs.y - obs.height);
+                    gCtx.lineTo(obs.x - obs.width / 2, obs.y);
+                    gCtx.stroke();
+                } else {
+                    // Barrier - wider and lower
+                    gCtx.fillRect(obs.x - 30, obs.y - obs.height + 10, 60, obs.height - 10);
+                    gCtx.fillStyle = '#ff6b6b';
+                    gCtx.fillRect(obs.x - 25, obs.y - obs.height + 15, 50, 5);
+                    gCtx.fillRect(obs.x - 25, obs.y - 15, 50, 5);
+                }
+                gCtx.shadowBlur = 0;
+            }
+
+            // Player
+            const px = game.player.x - game.player.width / 2;
+            const py = game.player.rolling ? game.player.y + 20 : game.player.y;
+
+            // Shadow
+            gCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            gCtx.beginPath();
+            gCtx.ellipse(game.player.x, game.groundY + 5, 25, 8, 0, 0, Math.PI * 2);
+            gCtx.fill();
+
+            // Body
+            const bodyHeight = game.player.rolling ? 30 : 50;
+            gCtx.fillStyle = game.playerColor;
+            gCtx.shadowColor = game.playerColor;
+            gCtx.shadowBlur = 15;
+            // Body
+            gCtx.fillRect(px + 5, py, 30, bodyHeight);
+            // Head
+            gCtx.shadowBlur = 10;
+            gCtx.beginPath();
+            gCtx.arc(game.player.x, py - 5, 18, 0, Math.PI * 2);
+            gCtx.fill();
+            // Cap
+            gCtx.fillStyle = '#e74c3c';
+            gCtx.shadowBlur = 0;
+            gCtx.fillRect(game.player.x - 20, py - 20, 40, 8);
+            gCtx.fillRect(game.player.x + 15, py - 25, 15, 12);
+
+            // Eyes
+            gCtx.fillStyle = 'white';
+            gCtx.beginPath();
+            gCtx.arc(game.player.x - 8, py - 10, 6, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.beginPath();
+            gCtx.arc(game.player.x + 8, py - 10, 6, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.fillStyle = '#1a1a2e';
+            gCtx.beginPath();
+            gCtx.arc(game.player.x - 10, py - 8, 3, 0, Math.PI * 2);
+            gCtx.fill();
+            gCtx.beginPath();
+            gCtx.arc(game.player.x + 6, py - 8, 3, 0, Math.PI * 2);
+            gCtx.fill();
+
+            // Rolling indicator
+            if (game.player.rolling) {
+                gCtx.fillStyle = 'rgba(255,255,255,0.3)';
+                gCtx.fillRect(px, py + 10, 40, 10);
+            }
+
+            gCtx.shadowBlur = 0;
+
+            // Ground line
+            gCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            gCtx.moveTo(0, game.groundY);
+            gCtx.lineTo(800, game.groundY);
+            gCtx.stroke();
+
+            // Score on canvas
+            gCtx.fillStyle = 'rgba(255,255,255,0.05)';
+            gCtx.fillRect(10, 10, 120, 40);
+            gCtx.fillStyle = 'white';
+            gCtx.font = '16px Arial';
+            gCtx.fillText(`🏃 ${Math.floor(game.score)}`, 20, 38);
+
+            // Speed indicator
+            gCtx.fillStyle = 'rgba(255,255,255,0.05)';
+            gCtx.fillRect(680, 10, 110, 40);
+            gCtx.fillStyle = '#888';
+            gCtx.font = '12px Arial';
+            gCtx.fillText(`Speed: ${Math.floor(game.speed)}`, 690, 38);
+
+            // Paused overlay
+            if (game.paused) {
+                gCtx.fillStyle = 'rgba(0,0,0,0.5)';
+                gCtx.fillRect(0, 0, 800, 600);
+                gCtx.fillStyle = 'white';
+                gCtx.font = '48px Arial';
+                gCtx.textAlign = 'center';
+                gCtx.fillText('⏸️ PAUSED', 400, 300);
+                gCtx.textAlign = 'left';
+            }
+        }
+
+        function gameLoop() {
+            if (!state.gameRunning) {
+                drawGame();
+                return;
+            }
+
+            if (!game.gameOver && !game.paused) {
+                updateGame();
+            }
+            drawGame();
+
+            // Update status with game info
+            if (state.isTracking && state.isHandDetected) {
+                const gestureText = state.isFist ? '✊ Roll' :
+                    state.handY < 0.3 ? '☝️ Jump' :
+                    state.handX < 0.3 ? '👈 Left' :
+                    state.handX > 0.7 ? '👉 Right' : '🏃 Run';
+                status.innerHTML = `🎮 Game: ${gestureText} | Score: ${Math.floor(game.score)}`;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================
+        // GAME CONTROLS
+        // ============================================
+        function startGame() {
+            initGame();
+            state.gameRunning = true;
+            game.paused = false;
+            gameOverlay.classList.remove('show');
+            gameStartBtn.textContent = '🔄 Restart';
+            gameStartBtn2.textContent = '▶️ Running';
+            status.innerHTML = '🎮 Game started! Use hand gestures to play!';
+        }
+
+        function pauseGame() {
+            game.paused = !game.paused;
+            gamePauseBtn.textContent = game.paused ? '▶️ Resume' : '⏸️ Pause';
+            status.innerHTML = game.paused ? '⏸️ Game Paused' : '▶️ Game Resumed';
+        }
+
+        function resetGame() {
+            initGame();
+            gameOverlayTitle.textContent = '🏃 SUBWAY SURFERS';
+            gameOverlaySub.textContent = 'Use hand gestures to play!';
+            gameOverlay.classList.add('show');
+            gameStartBtn.textContent = '🎮 Start Game';
+            gameStartBtn2.textContent = '▶️ Start';
+            state.gameRunning = false;
+            status.innerHTML = '🎮 Game reset. Click Start to play!';
+        }
+
+        function handleGameGesture(isFist, handX, handY) {
+            if (!state.gameRunning || game.gameOver || game.paused) return;
+
+            // Normalize hand positions (0-1)
+            const x = handX;
+            const y = handY;
+
+            // Jump: hand up (y < 0.3) and not fist
+            if (y < 0.3 && !isFist && !game.player.jumping) {
+                game.player.jumping = true;
+                game.player.jumpSpeed = -12;
+                game.player.y = 480;
+                game.player.jumpY = 0;
+                status.innerHTML = '☝️ JUMP!';
+                return;
+            }
+
+            // Roll: fist
+            if (isFist) {
+                game.player.rolling = true;
+                status.innerHTML = '✊ ROLL!';
+                // Auto-reset roll after a moment
+                clearTimeout(game.rollTimeout);
+                game.rollTimeout = setTimeout(() => {
+                    game.player.rolling = false;
+                }, 500);
+                return;
+            }
+
+            // Left: hand left
+            if (x < 0.3 && !isFist) {
+                if (game.player.lane > 0) {
+                    game.player.lane--;
+                    status.innerHTML = '👈 Left';
+                }
+                return;
+            }
+
+            // Right: hand right
+            if (x > 0.7 && !isFist) {
+                if (game.player.lane < 2) {
+                    game.player.lane++;
+                    status.innerHTML = '👉 Right';
+                }
+                return;
+            }
+
+            // Default: running
+            if (!isFist && y >= 0.3 && x >= 0.3 && x <= 0.7) {
+                game.player.rolling = false;
+                status.innerHTML = '🏃 Running';
+            }
+        }
+
+        // ============================================
+        // HAND TRACKING WITH GESTURE RECOGNITION
         // ============================================
         function onResults(results) {
             if (!state.isTracking) return;
@@ -567,7 +1299,7 @@
             canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                state.lostCounter = 0;
+                state.isHandDetected = true;
                 const landmarks = results.multiHandLandmarks[0];
 
                 // Draw landmarks
@@ -581,16 +1313,18 @@
                 const rawX = indexTip.x * canvasElement.width;
                 const rawY = indexTip.y * canvasElement.height;
 
-                // Apply Kalman filter for smooth tracking
+                // Apply Kalman filter
                 const filtered = positionFilter.update(rawX, rawY);
 
-                // Map to canvas coordinates
+                // Normalize coordinates (0-1)
+                state.handX = filtered.x / canvasElement.width;
+                state.handY = filtered.y / canvasElement.height;
+
+                // Map to canvas for whiteboard
                 const canvasX = (filtered.x / canvasElement.width) * state.canvasWidth;
                 const canvasY = (filtered.y / canvasElement.height) * state.canvasHeight;
 
-                state.lastValidPoint = { x: canvasX, y: canvasY };
-
-                // Check if fist - using Kalman smoothed positions for better detection
+                // Check if fist
                 const tips = [8, 12, 16, 20];
                 const joints = [6, 10, 14, 18];
                 let folded = 0;
@@ -601,35 +1335,38 @@
                 }
                 state.isFist = folded >= 3;
 
-                // Update status
-                if (state.isFist) {
-                    status.className = 'status status-paused';
-                    status.innerHTML = '✊ Fist detected - Drawing paused';
-                    state.lastPoint = null;
-                } else {
-                    status.className = 'status status-drawing';
-                    status.innerHTML = '☝️ Drawing mode - Move your finger!';
+                // ===== GAME MODE =====
+                if (state.mode === 'game') {
+                    handleGameGesture(state.isFist, state.handX, state.handY);
+                }
 
-                    const currentPoint = { x: canvasX, y: canvasY };
+                // ===== WHITEBOARD MODE =====
+                if (state.mode === 'whiteboard') {
+                    if (state.isFist) {
+                        status.className = 'status status-paused';
+                        status.innerHTML = '✊ Fist detected - Drawing paused';
+                        state.lastPoint = null;
+                    } else {
+                        status.className = 'status status-drawing';
+                        status.innerHTML = '☝️ Drawing mode - Move your finger!';
 
-                    if (state.lastPoint) {
-                        if (state.shape === 'free') {
-                            drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
+                        const currentPoint = { x: canvasX, y: canvasY };
+
+                        if (state.lastPoint) {
+                            if (state.shape === 'free') {
+                                drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
+                            } else {
+                                state.points.push(currentPoint);
+                                drawShape(state.points);
+                            }
+                            if (state.history.length % 10 === 0) saveState();
                         } else {
-                            state.points.push(currentPoint);
-                            const imgData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
-                            drawShape(state.points);
-                        }
-                        // Save state periodically
-                        if (state.history.length % 10 === 0) {
+                            state.points = [currentPoint];
                             saveState();
                         }
-                    } else {
-                        state.points = [currentPoint];
-                        saveState();
-                    }
 
-                    state.lastPoint = currentPoint;
+                        state.lastPoint = currentPoint;
+                    }
                 }
 
                 // Draw finger tip circle on camera feed
@@ -638,33 +1375,26 @@
                 canvasCtx.fillStyle = state.isFist ? '#FF0000' : '#00FF00';
                 canvasCtx.fill();
 
-                // Show filter info
+                // Show mode
                 canvasCtx.fillStyle = 'rgba(0,0,0,0.5)';
-                canvasCtx.fillRect(10, 10, 140, 25);
+                canvasCtx.fillRect(10, 10, 180, 25);
                 canvasCtx.fillStyle = 'white';
                 canvasCtx.font = '14px Arial';
-                canvasCtx.fillText('⚡ Kalman Filter', 20, 28);
+                canvasCtx.fillText(`⚡ ${state.mode.toUpperCase()}`, 20, 28);
 
                 canvasElement.style.display = 'block';
                 video.style.display = 'none';
 
             } else {
-                state.lostCounter++;
-                if (state.lostCounter < 5 && state.lastValidPoint) {
-                    // Use last valid position with slight decay
-                    state.lastPoint = state.lastValidPoint;
-                    status.className = 'status status-tracking';
-                    status.innerHTML = '🔄 Recovering tracking...';
-                    canvasElement.style.display = 'block';
-                    video.style.display = 'none';
-                } else {
-                    status.className = 'status status-idle';
-                    status.innerHTML = '👋 No hand detected - Show your hand';
-                    state.lastPoint = null;
-                    positionFilter.reset();
-                    canvasElement.style.display = 'none';
-                    video.style.display = 'block';
-                }
+                state.isHandDetected = false;
+                status.className = 'status status-idle';
+                status.innerHTML = state.mode === 'game' ?
+                    '👋 No hand detected - Show your hand to play!' :
+                    '👋 No hand detected - Show your hand';
+                state.lastPoint = null;
+                positionFilter.reset();
+                canvasElement.style.display = 'none';
+                video.style.display = 'block';
             }
         }
 
@@ -704,9 +1434,7 @@
                     onFrame: async () => {
                         try {
                             await handsInstance.send({ image: video });
-                        } catch (err) {
-                            // Silent fail
-                        }
+                        } catch (err) {}
                     },
                     width: 640,
                     height: 480,
@@ -716,7 +1444,9 @@
                 await cameraInstance.start();
 
                 status.className = 'status status-drawing';
-                status.innerHTML = '☝️ Show your hand and start drawing!';
+                status.innerHTML = state.mode === 'game' ?
+                    '🎮 Game mode - Use hand gestures to play!' :
+                    '☝️ Show your hand and start drawing!';
 
             } catch (err) {
                 console.error('Camera error:', err);
@@ -752,11 +1482,44 @@
         }
 
         // ============================================
+        // MODE SWITCHING
+        // ============================================
+        function switchMode(mode) {
+            state.mode = mode;
+            if (mode === 'whiteboard') {
+                whiteboardSection.classList.remove('hidden');
+                gameSection.classList.remove('active');
+                modeWhiteboard.classList.add('active');
+                modeGame.classList.remove('active');
+                status.innerHTML = '✏️ Whiteboard mode - Draw with your finger!';
+                // Stop game
+                state.gameRunning = false;
+                game.paused = true;
+            } else {
+                whiteboardSection.classList.add('hidden');
+                gameSection.classList.add('active');
+                modeGame.classList.add('active');
+                modeWhiteboard.classList.remove('active');
+                status.innerHTML = '🎮 Game mode - Use hand gestures to play!';
+                // Reset game state
+                if (!state.gameRunning) {
+                    resetGame();
+                }
+            }
+        }
+
+        // ============================================
         // EVENT LISTENERS
         // ============================================
+        // Mode switching
+        modeWhiteboard.addEventListener('click', () => switchMode('whiteboard'));
+        modeGame.addEventListener('click', () => switchMode('game'));
+
+        // Camera
         startBtn.addEventListener('click', startTracking);
         stopBtn.addEventListener('click', stopTracking);
 
+        // Whiteboard
         clearBtn.addEventListener('click', () => {
             clearCanvas();
             state.points = [];
@@ -794,6 +1557,50 @@
             });
         });
 
+        // Game controls
+        gameStartBtn.addEventListener('click', startGame);
+        gameStartBtn2.addEventListener('click', startGame);
+        gamePauseBtn.addEventListener('click', pauseGame);
+        gameResetBtn.addEventListener('click', resetGame);
+
+        // Keyboard controls for game (fallback)
+        document.addEventListener('keydown', (e) => {
+            if (state.mode !== 'game' || !state.gameRunning) return;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    if (!game.player.jumping) {
+                        game.player.jumping = true;
+                        game.player.jumpSpeed = -12;
+                        game.player.y = 480;
+                        game.player.jumpY = 0;
+                    }
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    game.player.rolling = true;
+                    setTimeout(() => { game.player.rolling = false; }, 500);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    if (game.player.lane > 0) game.player.lane--;
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    if (game.player.lane < 2) game.player.lane++;
+                    e.preventDefault();
+                    break;
+                case ' ':
+                    pauseGame();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
         // ============================================
         // MOUSE DRAWING (Fallback)
         // ============================================
@@ -801,7 +1608,7 @@
         let savedImageData = null;
 
         canvas.addEventListener('mousedown', (e) => {
-            if (state.isTracking) return;
+            if (state.isTracking || state.mode === 'game') return;
             isMouseDown = true;
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
@@ -813,7 +1620,7 @@
         });
 
         canvas.addEventListener('mousemove', (e) => {
-            if (!isMouseDown || state.isTracking) return;
+            if (!isMouseDown || state.isTracking || state.mode === 'game') return;
             const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
@@ -831,21 +1638,17 @@
         });
 
         canvas.addEventListener('mouseup', () => {
-            if (isMouseDown && !state.isTracking) {
+            if (isMouseDown && !state.isTracking && state.mode !== 'game') {
                 isMouseDown = false;
-                if (state.points.length > 1) {
-                    saveState();
-                }
+                if (state.points.length > 1) saveState();
                 state.points = [];
             }
         });
 
         canvas.addEventListener('mouseleave', () => {
-            if (isMouseDown && !state.isTracking) {
+            if (isMouseDown && !state.isTracking && state.mode !== 'game') {
                 isMouseDown = false;
-                if (state.points.length > 1) {
-                    saveState();
-                }
+                if (state.points.length > 1) saveState();
                 state.points = [];
             }
         });
@@ -856,8 +1659,14 @@
         initCanvas();
         stopBtn.disabled = true;
         landmarkCanvas.style.display = 'none';
+        gameOverlay.classList.add('show');
 
-        console.log('🖐️ Hand Tracking Whiteboard with Kalman Filter Ready!');
+        // Start game loop
+        state.gameRunning = false;
+        gameLoop();
+
+        console.log('🖐️ Hand Tracking Studio Ready!');
+        console.log('🎮 Switch between Whiteboard and Subway Surfers!');
 
         window.addEventListener('beforeunload', () => {
             if (cameraInstance) {
