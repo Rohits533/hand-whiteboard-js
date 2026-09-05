@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🖐️ Hand Tracking Whiteboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+
+        .drawing-area {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            position: relative;
+        }
+
+        #canvas {
+            width: 100%;
+            height: auto;
+            cursor: crosshair;
+            border-radius: 10px;
+            display: block;
+            background: white;
+            touch-action: none;
+        }
+
+        .camera-feed {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 10px;
+            transform: scaleX(-1);
+            display: none;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .controls h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #colorPicker {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        #brushSize {
+            width: 100%;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .status-idle {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-drawing {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-paused {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-tracking {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .shape-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 5px;
+        }
+
+        .shape-btn {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .shape-btn.active {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .shape-btn:hover {
+            border-color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖐️ Hand Tracking Whiteboard</h1>
+            <p>Draw in the air using your fingers! Show your hand to the camera.</p>
+        </div>
+
+        <div class="main-layout">
+            <div>
+                <div class="drawing-area">
+                    <canvas id="canvas" width="1200" height="700"></canvas>
+                </div>
+
+                <div class="camera-feed">
+                    <div id="status" class="status status-idle">👋 Click "Start Tracking" to begin</div>
+                    <video id="video" autoplay playsinline></video>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button id="startBtn" class="btn btn-primary">🎥 Start Tracking</button>
+                        <button id="stopBtn" class="btn btn-danger">⏹️ Stop</button>
+                        <button id="clearBtn" class="btn btn-warning">🗑️ Clear</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <h3>🎨 Tools</h3>
+
+                <div class="control-group">
+                    <label>Color</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="colorPicker" value="#FF0000" />
+                        <span id="colorHex">#FF0000</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Brush Size: <span id="sizeLabel">5</span></label>
+                    <input type="range" id="brushSize" min="1" max="30" value="5" />
+                </div>
+
+                <div class="control-group">
+                    <label>Shape</label>
+                    <div class="shape-selector">
+                        <button class="shape-btn active" data-shape="free">✏️ Free</button>
+                        <button class="shape-btn" data-shape="line">📏 Line</button>
+                        <button class="shape-btn" data-shape="rect">▭ Rect</button>
+                        <button class="shape-btn" data-shape="circle">⭕ Circle</button>
+                    </div>
+                </div>
+
+                <hr style="margin: 15px 0;" />
+
+                <button id="undoBtn" class="btn btn-success">↩️ Undo</button>
+                <button id="redoBtn" class="btn btn-success">↪️ Redo</button>
+
+                <hr style="margin: 15px 0;" />
+
+                <button id="downloadBtn" class="btn btn-primary">💾 Download PNG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MediaPipe CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029078/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        const state = {
+            isDrawing: false,
+            isTracking: false,
+            color: '#FF0000',
+            brushSize: 5,
+            shape: 'free',
+            points: [],
+            history: [],
+            redoStack: [],
+            lastPoint: null,
+            canvasWidth: 1200,
+            canvasHeight: 700,
+            fingerX: 0,
+            fingerY: 0,
+            isFist: false
+        };
+
+        // ============================================
+        // DOM REFERENCES
+        // ============================================
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+
+        const colorPicker = document.getElementById('colorPicker');
+        const brushSizeInput = document.getElementById('brushSize');
+        const sizeLabel = document.getElementById('sizeLabel');
+        const colorHex = document.getElementById('colorHex');
+
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        const shapeBtns = document.querySelectorAll('.shape-btn');
+
+        // ============================================
+        // CANVAS FUNCTIONS
+        // ============================================
+        function initCanvas() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, state.canvasWidth, state.canvasHeight);
+            saveState();
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = state.color;
+            ctx.lineWidth = state.brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+
+        function drawShape(points) {
+            if (points.length < 2) return;
+
+            ctx.strokeStyle = state.color;
+            ctx.lineWidth = state.brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+
+            if (state.shape === 'free') {
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.stroke();
+            } else if (state.shape === 'line') {
+                ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+                ctx.stroke();
+            } else if (state.shape === 'rect') {
+                const p1 = points[0];
+                const p2 = points[points.length - 1];
+                ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
+            } else if (state.shape === 'circle') {
+                const p1 = points[0];
+                const p2 = points[points.length - 1];
+                const r = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+                ctx.arc(p1.x, p1.y, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function saveState() {
+            const data = canvas.toDataURL();
+            state.history.push(data);
+            state.redoStack = [];
+        }
+
+        function undo() {
+            if (state.history.length > 1) {
+                state.redoStack.push(state.history.pop());
+                restoreCanvas(state.history[state.history.length - 1]);
+            }
+        }
+
+        function redo() {
+            if (state.redoStack.length > 0) {
+                const data = state.redoStack.pop();
+                state.history.push(data);
+                restoreCanvas(data);
+            }
+        }
+
+        function restoreCanvas(data) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = data;
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, state.canvasWidth, state.canvasHeight);
+            state.points = [];
+            state.lastPoint = null;
+            saveState();
+        }
+
+        // ============================================
+        // HAND TRACKING
+        // ============================================
+        function onResults(results) {
+            if (!state.isTracking) return;
+
+            // Draw hand landmarks on video
+            const canvasElement = document.createElement('canvas');
+            canvasElement.width = video.videoWidth;
+            canvasElement.height = video.videoHeight;
+            const canvasCtx = canvasElement.getContext('2d');
+            canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+
+                // Draw landmarks
+                const drawingUtils = window;
+                drawingUtils.drawConnectors(canvasCtx, landmarks, drawingUtils.HAND_CONNECTIONS, { color: '#00FF00',
+                    lineWidth: 2 });
+                drawingUtils.drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 1 });
+
+                // Get index finger tip (landmark 8)
+                const indexTip = landmarks[8];
+                const x = indexTip.x * canvasElement.width;
+                const y = indexTip.y * canvasElement.height;
+
+                // Map to canvas coordinates
+                const canvasX = (x / canvasElement.width) * state.canvasWidth;
+                const canvasY = (y / canvasElement.height) * state.canvasHeight;
+
+                state.fingerX = canvasX;
+                state.fingerY = canvasY;
+
+                // Check if fist (all fingertips below their joints)
+                const tips = [8, 12, 16, 20];
+                const joints = [6, 10, 14, 18];
+                let folded = 0;
+                for (let i = 0; i < tips.length; i++) {
+                    if (landmarks[tips[i]].y > landmarks[joints[i]].y) {
+                        folded++;
+                    }
+                }
+                state.isFist = folded >= 3;
+
+                // Update status
+                if (state.isFist) {
+                    status.className = 'status status-paused';
+                    status.innerHTML = '✊ Fist detected - Drawing paused';
+                    state.lastPoint = null;
+                } else {
+                    status.className = 'status status-drawing';
+                    status.innerHTML = '☝️ Drawing mode - Move your finger!';
+
+                    // Draw on canvas
+                    const currentPoint = { x: canvasX, y: canvasY };
+
+                    if (state.lastPoint) {
+                        // Add point to current stroke
+                        state.points.push(currentPoint);
+
+                        // Draw on canvas
+                        if (state.shape === 'free') {
+                            drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
+                        } else {
+                            // For shapes, redraw everything
+                            ctx.putImageData(savedImageData, 0, 0);
+                        }
+                    } else {
+                        // Start new stroke
+                        state.points = [currentPoint];
+                        // Save current canvas state
+                        savedImageData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
+                    }
+
+                    state.lastPoint = currentPoint;
+                }
+
+                // Draw finger tip circle
+                canvasCtx.beginPath();
+                canvasCtx.arc(x, y, 10, 0, 2 * Math.PI);
+                canvasCtx.fillStyle = state.isFist ? '#FF0000' : '#00FF00';
+                canvasCtx.fill();
+
+                // Show on video
+                video.style.display = 'block';
+            } else {
+                status.className = 'status status-idle';
+                status.innerHTML = '👋 No hand detected - Show your hand';
+                state.lastPoint = null;
+                video.style.display = 'block';
+            }
+
+            // Draw the video with landmarks
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvasElement.width;
+            tempCanvas.height = canvasElement.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(canvasElement, 0, 0);
+
+            // Display video with landmarks
+            video.style.display = 'block';
+
+            // Draw on canvas if shape is not free
+            if (state.shape !== 'free' && state.points.length > 0) {
+                // Redraw shape on canvas
+                const imgData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
+                drawShape(state.points);
+                // Save state after shape is complete
+                if (state.points.length > 1) {
+                    saveState();
+                }
+            }
+        }
+
+        let savedImageData = null;
+
+        // ============================================
+        // CAMERA SETUP
+        // ============================================
+        function startTracking() {
+            state.isTracking = true;
+            status.className = 'status status-tracking';
+            status.innerHTML = '🔄 Starting camera...';
+
+            const hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
+                }
+            });
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.5
+            });
+
+            hands.onResults(onResults);
+
+            const camera = new Camera(video, {
+                onFrame: async () => {
+                    await hands.send({ image: video });
+                },
+                width: 640,
+                height: 480
+            });
+
+            camera.start().then(() => {
+                status.className = 'status status-drawing';
+                status.innerHTML = '☝️ Show your hand and start drawing!';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }).catch((err) => {
+                status.className = 'status status-idle';
+                status.innerHTML = '❌ Camera error: ' + err.message;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            });
+
+            // Store camera and hands for cleanup
+            window._camera = camera;
+            window._hands = hands;
+        }
+
+        function stopTracking() {
+            state.isTracking = false;
+            state.lastPoint = null;
+            state.points = [];
+            status.className = 'status status-idle';
+            status.innerHTML = '⏹️ Tracking stopped';
+            video.style.display = 'none';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            if (window._camera) {
+                window._camera.stop();
+            }
+            if (window._hands) {
+                window._hands.close();
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        startBtn.addEventListener('click', startTracking);
+        stopBtn.addEventListener('click', stopTracking);
+
+        clearBtn.addEventListener('click', () => {
+            clearCanvas();
+            state.points = [];
+            state.lastPoint = null;
+        });
+
+        undoBtn.addEventListener('click', undo);
+        redoBtn.addEventListener('click', redo);
+
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `whiteboard_${new Date().getTime()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            state.color = e.target.value;
+            colorHex.textContent = state.color;
+        });
+
+        brushSizeInput.addEventListener('input', (e) => {
+            state.brushSize = parseInt(e.target.value);
+            sizeLabel.textContent = state.brushSize;
+        });
+
+        shapeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                shapeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.shape = btn.dataset.shape;
+                state.points = [];
+                state.lastPoint = null;
+            });
+        });
+
+        // Canvas click for manual drawing
+        canvas.addEventListener('click', (e) => {
+            if (state.isTracking) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            state.points.push({ x, y });
+
+            if (state.points.length > 1) {
+                drawShape(state.points);
+                saveState();
+            }
+
+            // Draw point indicator
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = state.color;
+            ctx.fill();
+        });
+
+        // Mouse move for drawing with mouse
+        let isMouseDown = false;
+        canvas.addEventListener('mousedown', (e) => {
+            if (state.isTracking) return;
+            isMouseDown = true;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            state.points = [{ x, y }];
+            savedImageData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isMouseDown || state.isTracking) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            state.points.push({ x, y });
+
+            if (state.shape === 'free') {
+                drawLine(state.points[state.points.length - 2].x, state.points[state.points.length - 2].y, x, y);
+            } else {
+                ctx.putImageData(savedImageData, 0, 0);
+                drawShape(state.points);
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (isMouseDown && !state.isTracking) {
+                isMouseDown = false;
+                if (state.points.length > 1) {
+                    saveState();
+                }
+                state.points = [];
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            if (isMouseDown && !state.isTracking) {
+                isMouseDown = false;
+                if (state.points.length > 1) {
+                    saveState();
+                }
+                state.points = [];
+            }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        initCanvas();
+        stopBtn.disabled = true;
+
+        console.log('🖐️ Hand Tracking Whiteboard Ready!');
+        console.log('📝 Draw with your finger using the camera or mouse!');
+    </script>
+</body>
+</html>
