@@ -88,6 +88,12 @@
             display: none;
         }
 
+        #landmarkCanvas {
+            width: 100%;
+            border-radius: 10px;
+            display: none;
+        }
+
         .controls {
             background: #f8f9fa;
             border-radius: 15px;
@@ -195,6 +201,7 @@
             text-align: center;
             font-weight: 600;
             margin: 10px 0;
+            transition: all 0.3s;
         }
 
         .status-idle {
@@ -215,6 +222,11 @@
         .status-tracking {
             background: #dbeafe;
             color: #1e40af;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .btn-group {
@@ -248,6 +260,22 @@
             border-color: #667eea;
         }
 
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         @media (max-width: 768px) {
             .main-layout {
                 grid-template-columns: 1fr;
@@ -275,9 +303,10 @@
                 <div class="camera-feed">
                     <div id="status" class="status status-idle">👋 Click "Start Tracking" to begin</div>
                     <video id="video" autoplay playsinline></video>
+                    <canvas id="landmarkCanvas"></canvas>
                     <div style="margin-top: 10px; display: flex; gap: 10px;">
                         <button id="startBtn" class="btn btn-primary">🎥 Start Tracking</button>
-                        <button id="stopBtn" class="btn btn-danger">⏹️ Stop</button>
+                        <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop</button>
                         <button id="clearBtn" class="btn btn-warning">🗑️ Clear</button>
                     </div>
                 </div>
@@ -321,10 +350,12 @@
         </div>
     </div>
 
-    <!-- MediaPipe CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029078/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248257/drawing_utils.js" crossorigin="anonymous"></script>
+    <!-- MediaPipe CDN - UPDATED VERSION -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous">
+    </script>
 
     <script>
         // ============================================
@@ -353,6 +384,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const video = document.getElementById('video');
+        const landmarkCanvas = document.getElementById('landmarkCanvas');
         const status = document.getElementById('status');
 
         const colorPicker = document.getElementById('colorPicker');
@@ -368,6 +400,10 @@
         const downloadBtn = document.getElementById('downloadBtn');
 
         const shapeBtns = document.querySelectorAll('.shape-btn');
+
+        let cameraInstance = null;
+        let handsInstance = null;
+        let animationId = null;
 
         // ============================================
         // CANVAS FUNCTIONS
@@ -465,17 +501,18 @@
         function onResults(results) {
             if (!state.isTracking) return;
 
-            // Draw hand landmarks on video
-            const canvasElement = document.createElement('canvas');
-            canvasElement.width = video.videoWidth;
-            canvasElement.height = video.videoHeight;
+            const canvasElement = landmarkCanvas;
+            canvasElement.width = video.videoWidth || 640;
+            canvasElement.height = video.videoHeight || 480;
             const canvasCtx = canvasElement.getContext('2d');
+
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             canvasCtx.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
 
-                // Draw landmarks
+                // Draw hand landmarks
                 const drawingUtils = window;
                 drawingUtils.drawConnectors(canvasCtx, landmarks, drawingUtils.HAND_CONNECTIONS, { color: '#00FF00',
                     lineWidth: 2 });
@@ -493,7 +530,7 @@
                 state.fingerX = canvasX;
                 state.fingerY = canvasY;
 
-                // Check if fist (all fingertips below their joints)
+                // Check if fist
                 const tips = [8, 12, 16, 20];
                 const joints = [6, 10, 14, 18];
                 let folded = 0;
@@ -513,25 +550,20 @@
                     status.className = 'status status-drawing';
                     status.innerHTML = '☝️ Drawing mode - Move your finger!';
 
-                    // Draw on canvas
                     const currentPoint = { x: canvasX, y: canvasY };
 
                     if (state.lastPoint) {
-                        // Add point to current stroke
-                        state.points.push(currentPoint);
-
-                        // Draw on canvas
                         if (state.shape === 'free') {
                             drawLine(state.lastPoint.x, state.lastPoint.y, currentPoint.x, currentPoint.y);
+                            saveState();
                         } else {
-                            // For shapes, redraw everything
-                            ctx.putImageData(savedImageData, 0, 0);
+                            state.points.push(currentPoint);
+                            // Redraw shape
+                            const imgData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
+                            drawShape(state.points);
                         }
                     } else {
-                        // Start new stroke
                         state.points = [currentPoint];
-                        // Save current canvas state
-                        savedImageData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
                     }
 
                     state.lastPoint = currentPoint;
@@ -543,103 +575,106 @@
                 canvasCtx.fillStyle = state.isFist ? '#FF0000' : '#00FF00';
                 canvasCtx.fill();
 
-                // Show on video
-                video.style.display = 'block';
+                canvasElement.style.display = 'block';
+                video.style.display = 'none';
             } else {
                 status.className = 'status status-idle';
                 status.innerHTML = '👋 No hand detected - Show your hand';
                 state.lastPoint = null;
+                canvasElement.style.display = 'none';
                 video.style.display = 'block';
             }
-
-            // Draw the video with landmarks
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvasElement.width;
-            tempCanvas.height = canvasElement.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(canvasElement, 0, 0);
-
-            // Display video with landmarks
-            video.style.display = 'block';
-
-            // Draw on canvas if shape is not free
-            if (state.shape !== 'free' && state.points.length > 0) {
-                // Redraw shape on canvas
-                const imgData = ctx.getImageData(0, 0, state.canvasWidth, state.canvasHeight);
-                drawShape(state.points);
-                // Save state after shape is complete
-                if (state.points.length > 1) {
-                    saveState();
-                }
-            }
         }
-
-        let savedImageData = null;
 
         // ============================================
         // CAMERA SETUP
         // ============================================
-        function startTracking() {
-            state.isTracking = true;
-            status.className = 'status status-tracking';
-            status.innerHTML = '🔄 Starting camera...';
-
-            const hands = new Hands({
-                locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`;
-                }
-            });
-
-            hands.setOptions({
-                maxNumHands: 1,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.7,
-                minTrackingConfidence: 0.5
-            });
-
-            hands.onResults(onResults);
-
-            const camera = new Camera(video, {
-                onFrame: async () => {
-                    await hands.send({ image: video });
-                },
-                width: 640,
-                height: 480
-            });
-
-            camera.start().then(() => {
-                status.className = 'status status-drawing';
-                status.innerHTML = '☝️ Show your hand and start drawing!';
+        async function startTracking() {
+            try {
+                state.isTracking = true;
+                status.className = 'status status-tracking';
+                status.innerHTML = '🔄 Starting camera... <span class="loading"></span>';
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
-            }).catch((err) => {
-                status.className = 'status status-idle';
-                status.innerHTML = '❌ Camera error: ' + err.message;
+
+                // Check if MediaPipe is loaded
+                if (typeof Hands === 'undefined') {
+                    throw new Error('MediaPipe library not loaded. Please refresh the page.');
+                }
+
+                // Create hands instance
+                handsInstance = new Hands({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`;
+                    }
+                });
+
+                handsInstance.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.7,
+                    minTrackingConfidence: 0.5
+                });
+
+                handsInstance.onResults(onResults);
+
+                // Create camera instance
+                cameraInstance = new Camera(video, {
+                    onFrame: async () => {
+                        try {
+                            await handsInstance.send({ image: video });
+                        } catch (err) {
+                            console.warn('Frame processing error:', err);
+                        }
+                    },
+                    width: 640,
+                    height: 480
+                });
+
+                await cameraInstance.start();
+
+                status.className = 'status status-drawing';
+                status.innerHTML = '☝️ Show your hand and start drawing!';
+
+            } catch (err) {
+                console.error('Camera error:', err);
+                status.className = 'status status-error';
+                status.innerHTML = '❌ Error: ' + err.message + '. Please refresh and try again.';
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
-            });
-
-            // Store camera and hands for cleanup
-            window._camera = camera;
-            window._hands = hands;
+                state.isTracking = false;
+            }
         }
 
         function stopTracking() {
             state.isTracking = false;
             state.lastPoint = null;
             state.points = [];
+
+            if (cameraInstance) {
+                try {
+                    cameraInstance.stop();
+                } catch (err) {
+                    console.warn('Camera stop error:', err);
+                }
+                cameraInstance = null;
+            }
+
+            if (handsInstance) {
+                try {
+                    handsInstance.close();
+                } catch (err) {
+                    console.warn('Hands close error:', err);
+                }
+                handsInstance = null;
+            }
+
             status.className = 'status status-idle';
             status.innerHTML = '⏹️ Tracking stopped';
             video.style.display = 'none';
+            landmarkCanvas.style.display = 'none';
             startBtn.disabled = false;
             stopBtn.disabled = true;
-
-            if (window._camera) {
-                window._camera.stop();
-            }
-            if (window._hands) {
-                window._hands.close();
-            }
         }
 
         // ============================================
@@ -684,33 +719,10 @@
             });
         });
 
-        // Canvas click for manual drawing
-        canvas.addEventListener('click', (e) => {
-            if (state.isTracking) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            const x = (e.clientX - rect.left) * scaleX;
-            const y = (e.clientY - rect.top) * scaleY;
-
-            state.points.push({ x, y });
-
-            if (state.points.length > 1) {
-                drawShape(state.points);
-                saveState();
-            }
-
-            // Draw point indicator
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, 2 * Math.PI);
-            ctx.fillStyle = state.color;
-            ctx.fill();
-        });
-
-        // Mouse move for drawing with mouse
+        // Mouse drawing
         let isMouseDown = false;
+        let savedImageData = null;
+
         canvas.addEventListener('mousedown', (e) => {
             if (state.isTracking) return;
             isMouseDown = true;
@@ -766,9 +778,24 @@
         // ============================================
         initCanvas();
         stopBtn.disabled = true;
+        landmarkCanvas.style.display = 'none';
 
         console.log('🖐️ Hand Tracking Whiteboard Ready!');
         console.log('📝 Draw with your finger using the camera or mouse!');
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (cameraInstance) {
+                try {
+                    cameraInstance.stop();
+                } catch (err) {}
+            }
+            if (handsInstance) {
+                try {
+                    handsInstance.close();
+                } catch (err) {}
+            }
+        });
     </script>
 </body>
 </html>
